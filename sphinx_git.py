@@ -1,4 +1,5 @@
 # Copyright 2012 (C) Daniel Watkins <daniel@daniel-watkins.co.uk>
+# Copyright 2013 (C) Guillaume Herail <guillaume@herail.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,14 +26,24 @@ class GitChangelog(Directive):
 
     option_spec = {
         'revisions': directives.nonnegative_int,
+        'dir': directives.flag,
     }
 
     def run(self):
         env = self.state.document.settings.env
-        repo = Repo(env.srcdir)
-        commits = repo.iter_commits()
+        config = env.config
+        repodir = env.srcdir + '/' + config["git_repository_root"]
+
+        doc_path = env.srcdir + '/' + env.docname + config["source_suffix"]
+
+        if self.options.get('dir', False) == None:
+            doc_path = '/'.join(doc_path.split('/')[:-1])
+
+        repo = Repo(repodir)
+        commits = repo.iter_commits(paths=doc_path)
         l = nodes.bullet_list()
         revisions_to_display = self.options.get('revisions', 10)
+
         for commit in list(commits)[:revisions_to_display]:
             date_str = datetime.fromtimestamp(commit.authored_date)
             if '\n' in commit.message:
@@ -56,4 +67,5 @@ class GitChangelog(Directive):
 
 
 def setup(app):
+    app.add_config_value('git_repository_root', "", True)
     app.add_directive('git_changelog', GitChangelog)

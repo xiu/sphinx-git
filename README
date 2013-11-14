@@ -5,8 +5,17 @@ To use it, add 'sphinx_git' to 'extensions' in your Sphinx conf.py, and add:
 
 .. git_changelog::
 
+Also add "git_repository_root" setting in conf.py with the relative path to the
+root of your git repository (ex: ..)
+
 where you want the list of commits to appear.  This will display 10 commits by
 default; if you want a different number then pass in the revisions option:
 
 .. git_changelog::
   :revisions: 5
+
+by default, git_changelog will only fetch commits that match the processed file,
+if you want it to get commits for the whole directory use :dir: like:
+
+.. git_changelog::
+  :dir:
